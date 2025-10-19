@@ -247,20 +247,30 @@ impl Plugin for Beverley {
         _aux: &mut AuxiliaryBuffers,
         _context: &mut impl ProcessContext<Self>,
     ) -> ProcessStatus {
-        for channel_samples in buffer.iter_samples() {
-            self.update_crushers();
+        let num_samples = buffer.samples();
+        let channels = buffer.as_slice();
 
-            // Process audio (VST3 uses ±1 range, f32)
-            let mut channel_iter = channel_samples.into_iter();
-
-            if let Some(left_sample) = channel_iter.next() {
-                let output = self.crusher_left.apply(*left_sample);
-                *left_sample = output;
+        if channels.len() == 1 {
+            // Mono input - process left channel only
+            let left_channel = &mut channels[0];
+            for sample_idx in 0..num_samples {
+                self.update_crushers();
+                let sample = &mut left_channel[sample_idx];
+                *sample = self.crusher_left.apply(*sample);
             }
+        } else {
+            // Stereo - process both channels
+            let (left_channel, rest) = channels.split_first_mut().unwrap();
+            let right_channel = &mut rest[0];
 
-            if let Some(right_sample) = channel_iter.next() {
-                let output = self.crusher_right.apply(*right_sample);
-                *right_sample = output;
+            for sample_idx in 0..num_samples {
+                self.update_crushers();
+
+                let left_sample = &mut left_channel[sample_idx];
+                *left_sample = self.crusher_left.apply(*left_sample);
+
+                let right_sample = &mut right_channel[sample_idx];
+                *right_sample = self.crusher_right.apply(*right_sample);
             }
         }
 
