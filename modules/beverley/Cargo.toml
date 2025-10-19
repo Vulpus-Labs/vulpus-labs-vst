@@ -1,0 +1,28 @@
+[package]
+name = "beverley"
+version = "0.1.0"
+edition = "2021"
+authors = ["Vulpus Labs"]
+description = "Advanced bitcrusher and harmonic distortion VST3 plugin"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# VST3 framework - using git repository
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug.git" }
+nih_plug_vizia = { git = "https://github.com/robbert-vdh/nih-plug.git" }
+
+# DSP utilities
+atomic_float = "1.0"
+
+[profile.release]
+lto = "fat"
+opt-level = 3
+codegen-units = 1
+strip = "symbols"
+
+[profile.profiling]
+inherits = "release"
+strip = "none"
+debug = true

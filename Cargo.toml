@@ -1,0 +1,3 @@
+[workspace]
+members = ["modules/beverley", "xtask"]
+resolver = "2"
