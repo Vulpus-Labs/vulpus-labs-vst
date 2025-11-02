@@ -1,0 +1,142 @@
+name: Build VST3 Plugins
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows VST3
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+
+    - name: Cache Cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Build Beverley VST3
+      run: cargo xtask bundle beverley --release
+
+    - name: Upload Windows VST3
+      uses: actions/upload-artifact@v4
+      with:
+        name: beverley-windows-vst3
+        path: target/bundled/beverley.vst3
+        if-no-files-found: error
+
+  build-macos-arm64:
+    name: Build macOS ARM64 VST3
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        targets: aarch64-apple-darwin
+
+    - name: Cache Cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-arm64-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-arm64-cargo-
+
+    - name: Build Beverley VST3 for ARM64
+      run: cargo xtask bundle beverley --release --target aarch64-apple-darwin
+
+    - name: Upload macOS ARM64 VST3
+      uses: actions/upload-artifact@v4
+      with:
+        name: beverley-macos-arm64-vst3
+        path: target/bundled/beverley.vst3
+        if-no-files-found: error
+
+  build-macos-universal:
+    name: Build macOS Universal VST3
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+    - name: Cache Cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-universal-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-universal-cargo-
+
+    - name: Build Beverley VST3 Universal Binary
+      run: cargo xtask bundle beverley --release --target universal2-apple-darwin
+
+    - name: Upload macOS Universal VST3
+      uses: actions/upload-artifact@v4
+      with:
+        name: beverley-macos-universal-vst3
+        path: target/bundled/beverley.vst3
+        if-no-files-found: error
+
+  create-release:
+    name: Create Release Package
+    runs-on: ubuntu-latest
+    needs: [build-windows, build-macos-arm64, build-macos-universal]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Create release archive
+      run: |
+        mkdir -p release
+        cp -r beverley-windows-vst3/* release/
+        cp -r beverley-macos-arm64-vst3/* release/
+        cp -r beverley-macos-universal-vst3/* release/
+
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: beverley-all-platforms
+        path: release/
