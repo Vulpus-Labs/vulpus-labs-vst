@@ -1,5 +1,5 @@
-// Beverley - Advanced bitcrusher and harmonic distortion VST3 plugin
-// Port of the Voltage Modular module to VST3
+// Beverley - Advanced bitcrusher and harmonic distortion CLAP plugin
+// Port of the Voltage Modular module to CLAP
 
 use nih_plug::prelude::*;
 use std::sync::Arc;
@@ -290,13 +290,7 @@ impl ClapPlugin for Beverley {
     ];
 }
 
-impl Vst3Plugin for Beverley {
-    const VST3_CLASS_ID: [u8; 16] = *b"VulpusBeverley!!";
-    const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] = &[
-        Vst3SubCategory::Fx,
-        Vst3SubCategory::Distortion,
-    ];
-}
-
 nih_export_clap!(Beverley);
-nih_export_vst3!(Beverley);
+
+// Export VST3 wrapper for the CLAP plugin
+clap_wrapper::export_vst3!();
