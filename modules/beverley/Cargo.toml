@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Vulpus Labs"]
 description = "Advanced bitcrusher and harmonic distortion CLAP plugin"
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib"]
