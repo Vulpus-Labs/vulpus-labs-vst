@@ -118,9 +118,9 @@ SOFTWARE.
 
 ## atomic_float
 
-**License:** MIT License / Apache License 2.0 (dual licensed)
-**Copyright:** Copyright (c) 2020 Taiki Endo
-**Repository:** https://github.com/taiki-e/atomic-float
+**License:** Apache License 2.0 / MIT License / Unlicense (triple licensed)
+**Copyright:** Copyright (c) Thom Chiovoloni
+**Repository:** https://github.com/thomcc/atomic_float
 
 ```
 MIT License
