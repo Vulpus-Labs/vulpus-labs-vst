@@ -35,7 +35,7 @@ jobs:
           ${{ runner.os }}-cargo-
 
     - name: Build Beverley VST3
-      run: cargo xtask bundle beverley --release
+      run: cargo run -p xtask -- bundle beverley --release
 
     - name: Upload Windows VST3
       uses: actions/upload-artifact@v4
@@ -72,7 +72,7 @@ jobs:
           ${{ runner.os }}-arm64-cargo-
 
     - name: Build Beverley VST3 for ARM64
-      run: cargo xtask bundle beverley --release --target aarch64-apple-darwin
+      run: cargo run -p xtask -- bundle beverley --release --target aarch64-apple-darwin
 
     - name: Upload macOS ARM64 VST3
       uses: actions/upload-artifact@v4
@@ -109,7 +109,7 @@ jobs:
           ${{ runner.os }}-universal-cargo-
 
     - name: Build Beverley VST3 Universal Binary
-      run: cargo xtask bundle beverley --release --target universal2-apple-darwin
+      run: cargo run -p xtask -- bundle beverley --release --target universal2-apple-darwin
 
     - name: Upload macOS Universal VST3
       uses: actions/upload-artifact@v4
